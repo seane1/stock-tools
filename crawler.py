@@ -15,10 +15,10 @@ def get_stocks(csv_file):
 def main():
 	print("stock	pe	mc	div	beta	debttoequity	profitmargin	cashpershare	earningsgrowth	revenuegrowth")
 
-	stocks = get_stocks("ftse100.csv")
+	stocks = get_stocks("asx.csv")
 	stocks.extend(get_stocks("sp500.csv"))
 	stocks.extend(get_stocks("nikkei.csv"))
-	stocks.extend(get_stocks("asx.csv"))
+	stocks.extend(get_stocks("ftse100.csv"))
 
 	tickers = yf.Tickers(stocks)
 	for stock in tickers.tickers:
