@@ -18,6 +18,7 @@ def main():
 	stocks = get_stocks("asx.csv")
 	stocks.extend(get_stocks("sp500.csv"))
 	stocks.extend(get_stocks("nikkei.csv"))
+	stocks.extend(get_stocks("ftse100.csv"))
 
 	tickers = yf.Tickers(stocks)
 	for stock in tickers.tickers:
