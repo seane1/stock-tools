@@ -1,5 +1,7 @@
 import csv
 import yfinance as yf
+# from datetime import datetime
+# import pandas_datareader as web
 
 BILLION = 1000000000
 
@@ -21,6 +23,7 @@ def main():
 	stocks.extend(get_stocks("ftse100.csv"))
 
 	tickers = yf.Tickers(stocks)
+	# multpl_stocks = web.get_data_yahoo(stocks, start = "2014-01-01", end = datetime.now().strftime("%Y-%m-%d"))
 	for stock in tickers.tickers:
 		info = tickers.tickers[stock].info
 		keys = info.keys()
