@@ -6,6 +6,9 @@ import yfinance as yf
 
 BILLION = 1000000000
 USD = 1.51
+JPY = 0.01
+GBP = 1.92
+EUR = 1.64
 
 def get_stocks(csv_file):
 	stocks = []
@@ -16,20 +19,29 @@ def get_stocks(csv_file):
 	return stocks
 
 
+def convert_currency(field, currency):
+	if currency == "USD":
+		field = field * USD
+	elif currency == "JPY":
+		field = field * JPY
+	elif currency == "GBP":
+		field = field * GBP
+	elif currency == "EUR":
+		field = field * EUR
+	return field
+
+
 def main(args):
-	# stocks = get_stocks("asx.csv")
-	# stocks.extend(get_stocks("sp500.csv"))
-	# stocks.extend(get_stocks("nikkei.csv"))
-	# stocks.extend(get_stocks("ftse100.csv"))
-
-	# stocks = ["RIO.AX", "BHP.AX", "STO.AX", "WDS.AX", "ALL.AX", "SHL.AX", "MO", "XOM"]
-
 	stocks = args
 	stocks.pop(0)
+	if len(args) == 0:
+		print("running in filter mode")
+		stocks = get_stocks("asx.csv")
+		stocks.extend(get_stocks("sp500.csv"))
+		stocks.extend(get_stocks("nikkei.csv"))
+		stocks.extend(get_stocks("ftse100.csv"))
 	n = len(stocks)
-
 	print(f"	pe	mc	div	div5	beta	debttoequity	profitmargin	cashpershare	earningsgrowth	revenuegrowth")
-
 	tickers = yf.Tickers(stocks)
 	all_pe = []
 	all_div_five_year = []
@@ -46,11 +58,12 @@ def main(args):
 		all_beta.append(beta)
 		debt_to_equity = round(info["debtToEquity"]/100, 2) if "debtToEquity" in keys else 0
 		market_cap = int(info["marketCap"]/BILLION) if "marketCap" in keys else 0
-		currency = info["currency"] if "currency" in keys else 0
-		if currency != 0 and currency == "USD":
-			market_cap = int(market_cap * USD)
-		profit_margin = round(info["profitMargins"], 2) if "profitMargins" in keys else 0
 		cash_per_share = round(info["totalCashPerShare"], 2) if "totalCashPerShare" in keys else 0
+		currency = info["currency"] if "currency" in keys else 0
+		if currency != 0:
+			market_cap = int(convert_currency(market_cap, currency))
+			cash_per_share = round(convert_currency(cash_per_share, currency), 2)
+		profit_margin = round(info["profitMargins"], 2) if "profitMargins" in keys else 0
 		earnings_growth = info["earningsGrowth"] if "earningsGrowth" in keys else 0
 		revenue_growth = info["revenueGrowth"] if "revenueGrowth" in keys else 0
 		div_unconverted = info.get("trailingAnnualDividendYield")
