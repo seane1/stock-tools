@@ -1,4 +1,5 @@
 import csv
+import sys
 import yfinance as yf
 # from datetime import datetime
 # import pandas_datareader as web
@@ -14,15 +15,22 @@ def get_stocks(csv_file):
 	return stocks
 
 
-def main():
+def main(args):
 	print("stock	pe	mc	div5	beta	debttoequity	profitmargin	cashpershare	earningsgrowth	revenuegrowth")
 
-	stocks = get_stocks("asx.csv")
-	stocks.extend(get_stocks("sp500.csv"))
-	stocks.extend(get_stocks("nikkei.csv"))
-	stocks.extend(get_stocks("ftse100.csv"))
+	# stocks = get_stocks("asx.csv")
+	# stocks.extend(get_stocks("sp500.csv"))
+	# stocks.extend(get_stocks("nikkei.csv"))
+	# stocks.extend(get_stocks("ftse100.csv"))
+
+	# stocks = ["RIO.AX", "BHP.AX", "STO.AX", "WDS.AX", "ALL.AX", "SHL.AX", "MO", "XOM"]
+	stocks = args
+	stocks.pop(0)
 
 	tickers = yf.Tickers(stocks)
+	all_pe = []
+	all_div_five_year = []
+	all_beta = []
 	# multpl_stocks = web.get_data_yahoo(stocks, start = "2014-01-01", end = datetime.now().strftime("%Y-%m-%d"))
 	for stock in tickers.tickers:
 		info = tickers.tickers[stock].info
@@ -30,7 +38,9 @@ def main():
 		price = info["currentPrice"] if "currentPrice" in keys else 0
 		eps = info["trailingEps"] if "trailingEps" in keys else 0
 		pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
+		all_pe.append(pe)
 		beta = info["beta"] if "beta" in keys else 0
+		all_beta.append(beta)
 		debt_to_equity = round(info["debtToEquity"]/100, 2) if "debtToEquity" in keys else 0
 		market_cap = int(info["marketCap"]/BILLION) if "marketCap" in keys else 0
 		profit_margin = round(info["profitMargins"], 2) if "profitMargins" in keys else 0
@@ -39,9 +49,14 @@ def main():
 		revenue_growth = info["revenueGrowth"] if "revenueGrowth" in keys else 0
 		# div_unconverted = info.get("trailingAnnualDividendYield")
 		div_five_year = info["fiveYearAvgDividendYield"] if "fiveYearAvgDividendYield" in keys else 0
+		all_div_five_year.append(div_five_year)
 		# div = round(div_unconverted * 100, 2) if div_unconverted is not None else 0
 		if pe > 0 and pe < 25 and market_cap > 1:
 			print(f"{stock}	{pe}	{market_cap}	{div_five_year}	{beta}	{debt_to_equity}		{profit_margin}		{cash_per_share}		{earnings_growth}		{revenue_growth}")
+	n = len(stocks)
+	print(f"pe: {round(sum(all_pe)/n, 2)}")
+	print(f"div5: {round(sum(all_div_five_year)/n, 2)}")
+	print(f"beta: {round(sum(all_beta)/n, 2)}")
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
