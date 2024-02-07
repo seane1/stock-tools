@@ -1,5 +1,6 @@
 import csv
 import sys
+import datetime
 import yfinance as yf
 # from datetime import datetime
 # import pandas_datareader as web
@@ -46,11 +47,13 @@ def main(args):
 	all_pe = []
 	all_div_five_year = []
 	all_beta = []
+	now = datetime.datetime.now().strftime("%Y-%m-%d")
 	# multpl_stocks = web.get_data_yahoo(stocks, start = "2014-01-01", end = datetime.now().strftime("%Y-%m-%d"))
 	for stock in tickers.tickers:
 		info = tickers.tickers[stock].info
 		keys = info.keys()
-		price = info["currentPrice"] if "currentPrice" in keys else 0
+		currency = info["currency"] if "currency" in keys else 0
+		price = round(convert_currency(info["currentPrice"], currency), 2) if "currentPrice" in keys else 0
 		eps = info["trailingEps"] if "trailingEps" in keys else 0
 		pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
 		all_pe.append(pe)
@@ -59,7 +62,6 @@ def main(args):
 		debt_to_equity = round(info["debtToEquity"]/100, 2) if "debtToEquity" in keys else 0
 		market_cap = int(info["marketCap"]/BILLION) if "marketCap" in keys else 0
 		cash_per_share = round(info["totalCashPerShare"], 2) if "totalCashPerShare" in keys else 0
-		currency = info["currency"] if "currency" in keys else 0
 		if currency != 0:
 			market_cap = int(convert_currency(market_cap, currency))
 			cash_per_share = round(convert_currency(cash_per_share, currency), 2)
