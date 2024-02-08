@@ -13,13 +13,18 @@ def roll():
 def main(args):
     mu = float(args[2])
     sigma = float(args[3])
+    eps = float(args[4])
     twosigma = sigma * 2
     threesigma = sigma * 3
-    for x in range(100):
+    average_eps_growth = 0
+    # 1000 universes
+    for x in range(1000):
         price = float(args[1])
         quantity = round(10000 / price)
+        pe1 = round(price / eps, 2)
         print("")
         print(f"quantity: {quantity} value: {round(price * quantity)}")
+        # simulate 10 years of prices
         for x in range(10):
             probability = roll()
             if probability == 7:
@@ -43,14 +48,21 @@ def main(args):
             # cant have negative prices
             if price < 0 or price < 0.0:
                 price = 0
-                print(price)
+                pe = price / eps
+                print(f"{price}     {pe}")
                 if x == 9:
-                    print(f"quantity: {quantity} value: {round(price * quantity)}")
+                    eps_growth = round((price/pe1)/eps, 2)
+                    print(f"quantity: {quantity} value: {round(price * quantity)} eps_growth: {eps_growth}")
+                    average_eps_growth = average_eps_growth + eps_growth
                 continue
-            print(round(price, 2))
+            pe = round(price / eps, 2)
+            print(f"{round(price, 2)}       {pe}")
             if x == 9:
-                print(f"quantity: {quantity} value: {round(price * quantity)}")
-        time.sleep(1)
+                eps_growth = round((price/pe1)/eps, 2)
+                print(f"quantity: {quantity} value: {round(price * quantity)} eps_growth: {eps_growth}")
+                average_eps_growth = average_eps_growth + eps_growth
+        # time.sleep(1)
+    print(round(average_eps_growth/1000, 2))
 
 if __name__ == "__main__":
     main(sys.argv)
