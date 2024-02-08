@@ -17,6 +17,7 @@ def main(args):
     twosigma = sigma * 2
     threesigma = sigma * 3
     average_eps_growth = 0
+    zero_count = 0
     # 1000 universes
     for x in range(1000):
         price = float(args[1])
@@ -52,17 +53,24 @@ def main(args):
                 print(f"{price}     {pe}")
                 if x == 9:
                     eps_growth = round((price/pe1)/eps, 2)
-                    print(f"quantity: {quantity} value: {round(price * quantity)} eps_growth: {eps_growth}")
+                    value = round(price * quantity)
+                    if value == 0:
+                        zero_count = zero_count + 1
+                    print(f"quantity: {quantity} value: {value} eps_growth: {eps_growth}")
                     average_eps_growth = average_eps_growth + eps_growth
                 continue
             pe = round(price / eps, 2)
             print(f"{round(price, 2)}       {pe}")
             if x == 9:
                 eps_growth = round((price/pe1)/eps, 2)
-                print(f"quantity: {quantity} value: {round(price * quantity)} eps_growth: {eps_growth}")
+                value = round(price * quantity)
+                if value == 0:
+                    zero_count = zero_count + 1
+                print(f"quantity: {quantity} value: {value} eps_growth: {eps_growth}")
                 average_eps_growth = average_eps_growth + eps_growth
         # time.sleep(1)
-    print(round(average_eps_growth/1000, 2))
+    print("")
+    print(f"average_eps_growth: {round(average_eps_growth/1000, 2)} zero_count: {zero_count}")
 
 if __name__ == "__main__":
     main(sys.argv)
