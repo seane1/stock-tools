@@ -15,9 +15,11 @@ def main(args):
     sigma = float(args[3])
     twosigma = sigma * 2
     threesigma = sigma * 3
-    for x in range(10):
+    for x in range(100):
         price = float(args[1])
+        quantity = round(10000 / price)
         print("")
+        print(f"quantity: {quantity} value: {round(price * quantity)}")
         for x in range(10):
             probability = roll()
             if probability == 7:
@@ -42,8 +44,12 @@ def main(args):
             if price < 0 or price < 0.0:
                 price = 0
                 print(price)
+                if x == 9:
+                    print(f"quantity: {quantity} value: {round(price * quantity)}")
                 continue
             print(round(price, 2))
+            if x == 9:
+                print(f"quantity: {quantity} value: {round(price * quantity)}")
         time.sleep(1)
 
 if __name__ == "__main__":
