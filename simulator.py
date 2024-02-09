@@ -122,5 +122,6 @@ def main(args):
     stocks.pop(0)
     simulate(get_stats(stocks))
 
+
 if __name__ == "__main__":
     main(sys.argv)
