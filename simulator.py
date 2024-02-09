@@ -7,8 +7,13 @@ from crawler import convert_currency
 
 
 UNIVERSES = 100
-RANGE = 20
+RANGE = 10
 PORTFOLIO = 10000
+DATA_PERIOD = "5y"
+DATA_INTERVAL = "3mo"
+DATA_OFFSET = 4
+CLOSE = "Close"
+ADJ_CLOSE = "Adj Close"
 
 
 def roll():
@@ -31,34 +36,35 @@ def get_prices(stocks):
 
 
 def get_stats(stocks):
-    data = yf.download(stocks, period="5y", interval="3mo")
-    individual_prices = data["Adj Close"]
+    data = yf.download(stocks, period=DATA_PERIOD, interval=DATA_INTERVAL)
+    individual_prices = data[ADJ_CLOSE]
     mus = []
     sigmas = []
     for stock in stocks:
         if len(stocks) == 1:
-            prices = individual_prices.pct_change().tolist()
+            prices = individual_prices[0::DATA_OFFSET].pct_change().tolist()
         else:
-            prices = individual_prices[stock].pct_change().tolist()
+            prices = individual_prices[stock][0::DATA_OFFSET].pct_change().tolist()
         prices = [x for x in prices if str(x) != 'nan']
         n = len(prices)
         total = sum(prices)
-        mu = round(total/n, 2)
-        sigma = round(statistics.stdev(prices), 2)
+        mu = round(total/n, 3)
+        sigma = round(statistics.stdev(prices), 3)
         mus.append(mu)
         sigmas.append(sigma)
     prices = get_prices(stocks)
-    return list(zip(prices, mus, sigmas))
+    return list(zip(stocks, prices, mus, sigmas))
 
 
-def simulate(stocks):   
+def simulate(stocks):
+    zero_stocks = []
     zero_count = 0
     final_values = []
     # mulitple universes
     for x in range(UNIVERSES):
         final_value = 0
         for stock in stocks:
-            (price_initial, mu, sigma) = stock
+            (stockticker, price_initial, mu, sigma) = stock
             twosigma = sigma * 2
             threesigma = sigma * 3
             price = price_initial
@@ -94,6 +100,7 @@ def simulate(stocks):
                         value = round(price * quantity)
                         if value == 0:
                             zero_count = zero_count + 1
+                            zero_stocks.append(stockticker)
                         final_value = final_value + value
                         print(f"quantity: {quantity} value: {value}")
                     continue
@@ -102,6 +109,7 @@ def simulate(stocks):
                     value = round(price * quantity)
                     if value == 0:
                         zero_count = zero_count + 1
+                        zero_stocks.append(stockticker)
                     final_value = final_value + value
                     print(f"quantity: {quantity} value: {value}")
             # time.sleep(1)
@@ -112,7 +120,9 @@ def simulate(stocks):
     for item in final_values:
         print(f" : {item}")
     for stock in stocks:
-        print(f"{stock[0]}      {stock[1]}  {stock[2]}")
+        print(f"{stock[0]}          {stock[1]}  {stock[2]}  {stock[3]}")
+    for stock in zero_stocks:
+        print(f"{stock}")
     print("")
     print(f"zero_count: {zero_count}")
 
