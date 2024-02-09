@@ -53,8 +53,8 @@ def get_stats(stocks):
 
 def simulate(stocks):   
     zero_count = 0
-    # mulitple universes
     final_values = []
+    # mulitple universes
     for x in range(UNIVERSES):
         final_value = 0
         for stock in stocks:
@@ -65,7 +65,7 @@ def simulate(stocks):
             quantity = round(PORTFOLIO / price)
             print("")
             print(f"quantity: {quantity} value: {round(price * quantity)}")
-            # simulate 10 years of prices
+            # simulate RANGE years of prices, either annually or in monthly blocks
             for x in range(RANGE):
                 probability = roll()
                 if probability == 7:
