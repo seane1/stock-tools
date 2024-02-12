@@ -3,18 +3,18 @@ import random
 import time
 import yfinance as yf
 import statistics
-from crawler import convert_currency
+from crawler import convert_currency, get_stocks
 
 
 UNIVERSES = 100
 RANGE = 10
 PORTFOLIO = 10000
 DATA_PERIOD = "5y"
-DATA_INTERVAL = "3mo"
-DATA_OFFSET = 4
+DATA_INTERVAL = "1mo"
+DATA_OFFSET = 12
 CLOSE = "Close"
 ADJ_CLOSE = "Adj Close"
-PE_FACTOR = 2
+PE_FACTOR = 2.5
 EPS_GROWTH_RATE = 1.1
 
 
@@ -30,17 +30,20 @@ def get_prices(stocks):
     prices = []
     epsvals = []
     pevals = []
+    betas = []
     for stock in tickers.tickers:
         info = tickers.tickers[stock].info
         keys = info.keys()
         currency = info["currency"] if "currency" in keys else 0
         price = round(convert_currency(info["currentPrice"], currency), 2) if "currentPrice" in keys else 0
+        beta = info["beta"] if "beta" in keys else 0
         eps = info["trailingEps"] if "trailingEps" in keys else 0
         pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
         prices.append(price)
         epsvals.append(eps)
         pevals.append(pe)
-    return prices, epsvals, pevals
+        betas.append(beta)
+    return prices, epsvals, pevals, betas
 
 
 def get_stats(stocks):
@@ -50,9 +53,9 @@ def get_stats(stocks):
     sigmas = []
     for stock in stocks:
         if len(stocks) == 1:
-            prices = individual_prices[0::DATA_OFFSET].pct_change().tolist()
+            prices = individual_prices.pct_change(periods=DATA_OFFSET).tolist()
         else:
-            prices = individual_prices[stock][0::DATA_OFFSET].pct_change().tolist()
+            prices = individual_prices[stock].pct_change(periods=DATA_OFFSET).tolist()
         prices = [x for x in prices if str(x) != 'nan']
         n = len(prices)
         total = sum(prices)
@@ -60,8 +63,8 @@ def get_stats(stocks):
         sigma = round(statistics.stdev(prices), 3)
         mus.append(mu)
         sigmas.append(sigma)
-    prices, eps, pes = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes))
+    prices, eps, pes, betas = get_prices(stocks)
+    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas))
 
 
 def simulate(stocks):
@@ -156,7 +159,32 @@ def simulate(stocks):
 def main(args):
     stocks = args
     stocks.pop(0)
-    simulate(get_stats(stocks))
+    if len(args) == 0:
+        print("running in filter mode")
+        stocks = get_stocks("asx.csv")
+        # stocks.extend(get_stocks("sp500.csv"))
+        # stocks.extend(get_stocks("nikkei.csv"))
+    stock_list = get_stats(stocks)
+    # filtered_stocks = [x for x in stock_list if x[2] >= 0.10]
+    returns = []
+    sigmas = []
+    betas = []
+    for stock in stock_list:
+        code = stock[0]
+        price = stock[1]
+        gain = stock[2]
+        sigma_individual = stock[3]
+        beta_individual = stock[6]
+        returns.append(gain)
+        betas.append(beta_individual)
+        sigmas.append(sigma_individual)
+        print(f"{code}          {price}  {gain}  {sigma_individual}   {beta_individual}")
+    n = len(returns)
+    total = sum(returns)
+    mu = round(total / n, 2)
+    beta = round(sum(betas) / n, 2)
+    sigma = round(sum(sigmas) / n, 2)
+    print(f"{mu}    {sigma}    {beta}")
 
 
 if __name__ == "__main__":

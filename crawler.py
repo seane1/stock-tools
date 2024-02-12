@@ -35,9 +35,9 @@ def main(args):
 	if len(args) == 0:
 		print("running in filter mode")
 		stocks = get_stocks("asx.csv")
-		stocks.extend(get_stocks("sp500.csv"))
+		# stocks.extend(get_stocks("sp500.csv"))
 		stocks.extend(get_stocks("nikkei.csv"))
-		stocks.extend(get_stocks("ftse100.csv"))
+		# stocks.extend(get_stocks("ftse100.csv"))
 	n = len(stocks)
 	print(f"	pe	mc	div	div5	beta	debttoequity	profitmargin	cashpershare	earningsgrowth	revenuegrowth")
 	tickers = yf.Tickers(stocks)
