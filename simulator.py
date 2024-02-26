@@ -1,19 +1,12 @@
 import sys
-import random
 import time
-import yfinance as yf
-import statistics
-from crawler import convert_currency, get_stocks
+import random
+from utils import *
 
 
 UNIVERSES = 100
 RANGE = 10
 PORTFOLIO = 10000
-DATA_PERIOD = "5y"
-DATA_INTERVAL = "1mo"
-DATA_OFFSET = 12
-CLOSE = "Close"
-ADJ_CLOSE = "Adj Close"
 PE_FACTOR = 2.5
 EPS_GROWTH_RATE = 1.1
 
@@ -23,48 +16,6 @@ def roll():
     second = random.randint(1,6)
     probability = first + second
     return probability
-
-
-def get_prices(stocks):
-    tickers = yf.Tickers(stocks)
-    prices = []
-    epsvals = []
-    pevals = []
-    betas = []
-    for stock in tickers.tickers:
-        info = tickers.tickers[stock].info
-        keys = info.keys()
-        currency = info["currency"] if "currency" in keys else 0
-        price = round(convert_currency(info["currentPrice"], currency), 2) if "currentPrice" in keys else 0
-        beta = info["beta"] if "beta" in keys else 0
-        eps = info["trailingEps"] if "trailingEps" in keys else 0
-        pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
-        prices.append(price)
-        epsvals.append(eps)
-        pevals.append(pe)
-        betas.append(beta)
-    return prices, epsvals, pevals, betas
-
-
-def get_stats(stocks):
-    data = yf.download(stocks, period=DATA_PERIOD, interval=DATA_INTERVAL)
-    individual_prices = data[ADJ_CLOSE]
-    mus = []
-    sigmas = []
-    for stock in stocks:
-        if len(stocks) == 1:
-            prices = individual_prices.pct_change(periods=DATA_OFFSET).tolist()
-        else:
-            prices = individual_prices[stock].pct_change(periods=DATA_OFFSET).tolist()
-        prices = [x for x in prices if str(x) != 'nan']
-        n = len(prices)
-        total = sum(prices)
-        mu = round(total/n, 3)
-        sigma = round(statistics.stdev(prices), 3)
-        mus.append(mu)
-        sigmas.append(sigma)
-    prices, eps, pes, betas = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas))
 
 
 def simulate(stocks):

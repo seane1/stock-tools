@@ -1,32 +1,9 @@
-import csv
 import sys
 import yfinance as yf
+from utils import *
+
 
 BILLION = 1000000000
-USD = 1.51
-JPY = 0.01
-GBP = 1.92
-EUR = 1.64
-
-def get_stocks(csv_file):
-	stocks = []
-	with open(csv_file, newline='') as csvfile:
-		reader = csv.reader(csvfile, delimiter=',')
-		for stock in reader:
-			stocks.append(stock[0])
-	return stocks
-
-
-def convert_currency(field, currency):
-	if currency == "USD":
-		field = field * USD
-	elif currency == "JPY":
-		field = field * JPY
-	elif currency == "GBP":
-		field = field * GBP
-	elif currency == "EUR":
-		field = field * EUR
-	return field
 
 
 def main(args):

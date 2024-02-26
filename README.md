@@ -1,10 +1,7 @@
 # stockcrawler
 
-started as stock crawler downloading prices and filtering on value factors
+1. crawler: crawl market lists and display factors
 
-has become portfolio simulator
+2. risk: show risk and returns
 
-will probably combine the two aspects
-
-will probably change the probability function at some point
-
+3. simulator: run portfolio simulator, using normal distribution
