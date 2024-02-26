@@ -7,9 +7,9 @@ def main(args):
     stocks.pop(0)
     if len(args) == 0:
         print("running in filter mode")
-        stocks = get_stocks("nikkei.csv")
-        # stocks.extend(get_stocks("sp500.csv"))
+        stocks = get_stocks("sp500.csv")
         # stocks.extend(get_stocks("asx.csv"))
+        # stocks.extend(get_stocks("nikkei.csv"))
     stock_list = get_stats(stocks)
     # filtered_stocks = [x for x in stock_list if x[2] >= 0.10]
     means = []
@@ -30,7 +30,7 @@ def main(args):
         betas.append(beta_individual)
         sigmas.append(sigma_individual)
         annual_returns.append(combined_return)
-        print(f"{code}          {price}  {mean}     {sigma_individual}   {beta_individual}  {combined_return}")
+        print(f"{code}          {price}  {mean}     {sigma_individual}   {beta_individual}  {'%.2f' % combined_return}")
     n = len(means)
     total = sum(means)
     mu = round(total / n, 2)
