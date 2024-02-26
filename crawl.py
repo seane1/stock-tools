@@ -11,7 +11,7 @@ def main(args):
 	stocks.pop(0)
 	if len(args) == 0:
 		print("running in filter mode")
-		stocks = get_stocks("sp500.csv")
+		stocks = get_stocks("nikkei.csv")
 		# stocks.extend(get_stocks("sp500.csv"))
 		# stocks.extend(get_stocks("asx.csv"))
 		# stocks.extend(get_stocks("ftse100.csv"))

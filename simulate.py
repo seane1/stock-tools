@@ -26,7 +26,7 @@ def simulate(stocks):
     for x in range(UNIVERSES):
         final_value = 0
         for stock in stocks:
-            (stockticker, price_initial, mu, sigma, eps_initial, pe_initial) = stock
+            (stockticker, price_initial, mu, sigma, eps_initial, pe_initial, beta) = stock
             twosigma = sigma * 2
             threesigma = sigma * 3
             price = price_initial
@@ -92,7 +92,7 @@ def simulate(stocks):
                         zero_stocks.append(stockticker)
                     final_value = final_value + value
                     print(f"quantity: {quantity} value: {value}")
-            # time.sleep(1)
+            time.sleep(1)
         final_values.append(final_value)
         print("")
         print(f"portfolio: {final_value}")
@@ -115,27 +115,7 @@ def main(args):
         stocks = get_stocks("asx.csv")
         # stocks.extend(get_stocks("sp500.csv"))
         # stocks.extend(get_stocks("nikkei.csv"))
-    stock_list = get_stats(stocks)
-    # filtered_stocks = [x for x in stock_list if x[2] >= 0.10]
-    returns = []
-    sigmas = []
-    betas = []
-    for stock in stock_list:
-        code = stock[0]
-        price = stock[1]
-        gain = stock[2]
-        sigma_individual = stock[3]
-        beta_individual = stock[6]
-        returns.append(gain)
-        betas.append(beta_individual)
-        sigmas.append(sigma_individual)
-        print(f"{code}          {price}  {gain}  {sigma_individual}   {beta_individual}")
-    n = len(returns)
-    total = sum(returns)
-    mu = round(total / n, 2)
-    beta = round(sum(betas) / n, 2)
-    sigma = round(sum(sigmas) / n, 2)
-    print(f"{mu}    {sigma}    {beta}")
+    simulate(get_stats(stocks))
 
 
 if __name__ == "__main__":
