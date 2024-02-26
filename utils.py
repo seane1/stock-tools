@@ -1,6 +1,7 @@
 import csv
 import yfinance as yf
 import statistics
+import math
 
 
 USD = 1.51
@@ -49,20 +50,23 @@ def get_stats(stocks):
     individual_prices = data[ADJ_CLOSE]
     mus = []
     sigmas = []
+    annual_returns = []
     for stock in stocks:
         if len(stocks) == 1:
             prices = individual_prices.pct_change(periods=DATA_OFFSET).tolist()
         else:
             prices = individual_prices[stock].pct_change(periods=DATA_OFFSET).tolist()
         prices = [x for x in prices if str(x) != 'nan']
+        annual_return = get_return(prices[0], prices[-1])
         n = len(prices)
         total = sum(prices)
         mu = round(total/n, 3)
         sigma = round(statistics.stdev(prices), 3)
         mus.append(mu)
         sigmas.append(sigma)
+        annual_returns.append(annual_return)
     prices, eps, pes, betas = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas))
+    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns))
 
 
 def convert_currency(field, currency):
@@ -75,3 +79,7 @@ def convert_currency(field, currency):
 	elif currency == "EUR":
 		field = field * EUR
 	return field
+
+
+def get_return(price_start, price_end):
+	return round((math.log(price_end/price_start)/DATA_PERIOD),4)*100
