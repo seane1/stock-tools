@@ -9,6 +9,7 @@ JPY = 0.01
 GBP = 1.92
 EUR = 1.64
 DATA_PERIOD = "5y"
+DATA_PERIOD_NUMERICAL = 5
 DATA_INTERVAL = "1mo"
 DATA_OFFSET = 12
 CLOSE = "Close"
@@ -30,6 +31,7 @@ def get_prices(stocks):
     epsvals = []
     pevals = []
     betas = []
+    div_fives = []
     for stock in tickers.tickers:
         info = tickers.tickers[stock].info
         keys = info.keys()
@@ -38,11 +40,13 @@ def get_prices(stocks):
         beta = info["beta"] if "beta" in keys else 0
         eps = info["trailingEps"] if "trailingEps" in keys else 0
         pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
+        div_five_year = info["fiveYearAvgDividendYield"] if "fiveYearAvgDividendYield" in keys else 0
         prices.append(price)
         epsvals.append(eps)
         pevals.append(pe)
         betas.append(beta)
-    return prices, epsvals, pevals, betas
+        div_fives.append(div_five_year)
+    return prices, epsvals, pevals, betas, div_fives
 
 
 def get_stats(stocks):
@@ -53,20 +57,22 @@ def get_stats(stocks):
     annual_returns = []
     for stock in stocks:
         if len(stocks) == 1:
-            prices = individual_prices.pct_change(periods=DATA_OFFSET).tolist()
+            price_changes = individual_prices.pct_change(periods=DATA_OFFSET).tolist()
+            prices = individual_prices.tolist()
         else:
-            prices = individual_prices[stock].pct_change(periods=DATA_OFFSET).tolist()
-        prices = [x for x in prices if str(x) != 'nan']
+            price_changes = individual_prices[stock].pct_change(periods=DATA_OFFSET).tolist()
+            prices = individual_prices[stock].tolist()
+        price_changes = [x for x in price_changes if str(x) != 'nan']
         annual_return = get_return(prices[0], prices[-1])
-        n = len(prices)
-        total = sum(prices)
+        n = len(price_changes)
+        total = sum(price_changes)
         mu = round(total/n, 3)
-        sigma = round(statistics.stdev(prices), 3)
+        sigma = round(statistics.stdev(price_changes), 3)
         mus.append(mu)
         sigmas.append(sigma)
         annual_returns.append(annual_return)
-    prices, eps, pes, betas = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns))
+    prices, eps, pes, betas, div_fives = get_prices(stocks)
+    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives))
 
 
 def convert_currency(field, currency):
@@ -82,4 +88,4 @@ def convert_currency(field, currency):
 
 
 def get_return(price_start, price_end):
-	return round((math.log(price_end/price_start)/DATA_PERIOD),4)*100
+	return round((math.log(price_end/price_start)/DATA_PERIOD_NUMERICAL),4)*100
