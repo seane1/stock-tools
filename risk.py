@@ -7,21 +7,23 @@ def main(args):
     stocks.pop(0)
     if len(args) == 0:
         print("running in filter mode")
-        stocks = get_stocks("sp500.csv")
+        stocks = get_stocks("nikkei.csv")
         # stocks.extend(get_stocks("asx.csv"))
-        # stocks.extend(get_stocks("nikkei.csv"))
+        # stocks.extend(get_stocks("sp500.csv"))
     stock_list = get_stats(stocks)
     # filtered_stocks = [x for x in stock_list if x[2] >= 0.10]
     means = []
     sigmas = []
     betas = []
     annual_returns = []
-    print(f"                price   mean        sigma   beta   annualreturn")
+    pes = []
+    print(f"                price   mean        sigma   beta   annualreturn pe")
     for stock in stock_list:
         code = stock[0]
         price = stock[1]
         mean = stock[2]
         sigma_individual = stock[3]
+        pe = stock[5]
         beta_individual = stock[6]
         annual_return = stock[7]
         div_five = stock[8]
@@ -30,17 +32,20 @@ def main(args):
         betas.append(beta_individual)
         sigmas.append(sigma_individual)
         annual_returns.append(combined_return)
-        print(f"{code}          {price}  {mean}     {sigma_individual}   {beta_individual}  {'%.2f' % combined_return}")
+        pes.append(pe)
+        print(f"{code}          {price}  {mean}     {sigma_individual}   {beta_individual}  {'%.2f' % combined_return}  {pe}")
     n = len(means)
     total = sum(means)
     mu = round(total / n, 2)
     beta = round(sum(betas) / n, 2)
     sigma = round(sum(sigmas) / n, 2)
     average_return = round(sum(annual_returns) / n, 2)
+    pe = round(sum(pes) / n, 2)
     print(f"mu: {mu}")
     print(f"sigma: {sigma}")
     print(f"beta: {beta}")
     print(f"return: {average_return}")
+    print(f"pe: {pe}")
 
 
 if __name__ == "__main__":

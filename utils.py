@@ -2,18 +2,7 @@ import csv
 import yfinance as yf
 import statistics
 import math
-
-
-USD = 1.51
-JPY = 0.01
-GBP = 1.92
-EUR = 1.64
-DATA_PERIOD = "5y"
-DATA_PERIOD_NUMERICAL = 5
-DATA_INTERVAL = "1mo"
-DATA_OFFSET = 12
-CLOSE = "Close"
-ADJ_CLOSE = "Adj Close"
+from constants import *
 
 
 def get_stocks(csv_file):
@@ -34,18 +23,12 @@ def get_prices(stocks):
     div_fives = []
     for stock in tickers.tickers:
         info = tickers.tickers[stock].info
-        keys = info.keys()
-        currency = info["currency"] if "currency" in keys else 0
-        price = round(convert_currency(info["currentPrice"], currency), 2) if "currentPrice" in keys else 0
-        beta = info["beta"] if "beta" in keys else 0
-        eps = info["trailingEps"] if "trailingEps" in keys else 0
-        pe = round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0
-        div_five_year = info["fiveYearAvgDividendYield"] if "fiveYearAvgDividendYield" in keys else 0
-        prices.append(price)
-        epsvals.append(eps)
-        pevals.append(pe)
-        betas.append(beta)
-        div_fives.append(div_five_year)
+        stock = parse_stock(info)
+        prices.append(stock["price"])
+        epsvals.append(stock["eps"])
+        pevals.append(stock["pe"])
+        betas.append(stock["beta"])
+        div_fives.append(stock["div_five_year"])
     return prices, epsvals, pevals, betas, div_fives
 
 
@@ -89,3 +72,32 @@ def convert_currency(field, currency):
 
 def get_return(price_start, price_end):
 	return round((math.log(price_end/price_start)/DATA_PERIOD_NUMERICAL),4)*100
+
+
+def parse_stock(info):
+	keys = info.keys()
+	market_cap = int(info["marketCap"]/BILLION) if "marketCap" in keys else 0
+	currency = info["currency"] if "currency" in keys else 0
+	cash_per_share = round(info["totalCashPerShare"], 2) if "totalCashPerShare" in keys else 0
+	div_unconverted = info.get("trailingAnnualDividendYield")
+	div = round(div_unconverted * 100, 2) if div_unconverted is not None else 0
+	stock = {
+        "name" : info["longName"] if "longName" in keys else "None",
+        "pb" : round(info["priceToBook"], 2) if "priceToBook" in keys and type(info["priceToBook"]) is not str  else 0,
+        "currency" : currency,
+        "price" : round(convert_currency(info["currentPrice"], currency), 2) if "currentPrice" in keys else 0,
+        "eps" : info["trailingEps"] if "trailingEps" in keys else 0,
+        "pe" : round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0,
+        "beta" : info["beta"] if "beta" in keys else 0,
+        "debt_to_equity" : round(info["debtToEquity"]/100, 2) if "debtToEquity" in keys else 0,
+        "market_cap" : market_cap,
+        "cash_per_share" : cash_per_share,
+        "market_cap" : int(convert_currency(market_cap, currency)) if currency != 0 else 0,
+        "cash_per_share" : round(convert_currency(cash_per_share, currency), 2) if currency != 0 else 0,
+        "profit_margin" : round(info["profitMargins"], 2) if "profitMargins" in keys else 0,
+        "earnings_growth" : info["earningsGrowth"] if "earningsGrowth" in keys else 0,
+        "revenue_growth" : info["revenueGrowth"] if "revenueGrowth" in keys else 0,
+        "div" : div,
+        "div_five_year" : info["fiveYearAvgDividendYield"] if "fiveYearAvgDividendYield" in keys else 0,
+    }
+	return stock
