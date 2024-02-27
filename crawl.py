@@ -30,7 +30,10 @@ def main(args):
 		else:
 			all_div_five_year.append(stock_data["div"])
 		# if pe > 0 and pe < 30 and profit_margin >= 0.10:
-		print(f"{stock}	{stock_data['market_cap']}	{stock_data['pe']}	{stock_data['pb']}	{stock_data['div']}	{stock_data['div_five_year']}	{stock_data['beta']}	{stock_data['debt_to_equity']}		{stock_data['profit_margin']}		{stock_data['cash_per_share']}		{stock_data['earnings_growth']}		{stock_data['revenue_growth']}	{stock_data['name']}")
+		output = f"{stock}	{stock_data['market_cap']}	{stock_data['pe']}	{stock_data['pb']}	{stock_data['div']}	" \
+				f"{stock_data['div_five_year']}	{stock_data['beta']}	{stock_data['debt_to_equity']}		{stock_data['profit_margin']}		"\
+		f"{stock_data['cash_per_share']}		{stock_data['earnings_growth']}		{stock_data['revenue_growth']}	{stock_data['name']}"
+		print(output)
 	print(f"pe: {round(sum(all_pe)/n, 2)}")
 	print(f"pb: {round(sum(all_pb)/n, 2)}")
 	print(f"div5: {round(sum(all_div_five_year)/n, 2)}")
