@@ -17,7 +17,8 @@ def main(args):
     betas = []
     annual_returns = []
     pes = []
-    print(f"                price   mean        sigma   beta   annualreturn pe")
+    sharpes = []
+    print(f"\treturn\tmean\tsigma\tsharpe\tbeta\tpe")
     for stock in stock_list:
         code = stock[0]
         price = stock[1]
@@ -28,12 +29,14 @@ def main(args):
         annual_return = stock[7]
         div_five = stock[8]
         combined_return = annual_return + div_five
+        sharpe = round(mean/sigma_individual, 2)
+        sharpes.append(sharpe)
         means.append(mean)
         betas.append(beta_individual)
         sigmas.append(sigma_individual)
         annual_returns.append(combined_return)
         pes.append(pe)
-        print(f"{code}          {price}  {mean}     {sigma_individual}   {beta_individual}  {'%.2f' % combined_return}  {pe}")
+        print(f"{code}\t{'%.2f' % combined_return}\t{mean}\t{sigma_individual}\t{sharpe}\t{beta_individual}\t{pe}")
     n = len(means)
     total = sum(means)
     mu = round(total / n, 2)
@@ -41,11 +44,14 @@ def main(args):
     sigma = round(sum(sigmas) / n, 2)
     average_return = round(sum(annual_returns) / n, 2)
     pe = round(sum(pes) / n, 2)
-    print(f"mu: {mu}")
-    print(f"sigma: {sigma}")
-    print(f"beta: {beta}")
-    print(f"return: {average_return}")
-    print(f"pe: {pe}")
+    sharpe = round(sum(sharpes) / n, 2)
+    print()
+    print(f"mu:\t{mu}")
+    print(f"sigma:\t{sigma}")
+    print(f"beta:\t{beta}")
+    print(f"return:\t{average_return}")
+    print(f"sharpe:\t{sharpe}")
+    print(f"pe:\t{pe}")
 
 
 if __name__ == "__main__":
