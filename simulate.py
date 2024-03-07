@@ -26,7 +26,7 @@ def simulate(stocks):
     for x in range(UNIVERSES):
         final_value = 0
         for stock in stocks:
-            (stockticker, price_initial, mu, sigma, eps_initial, pe_initial, beta, annual_returns, div_fives) = stock
+            (stockticker, price_initial, mu, sigma, eps_initial, pe_initial, beta, annual_returns, div_fives, names) = stock
             twosigma = sigma * 2
             threesigma = sigma * 3
             price = price_initial

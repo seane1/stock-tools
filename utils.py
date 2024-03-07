@@ -21,6 +21,7 @@ def get_prices(stocks):
     pevals = []
     betas = []
     div_fives = []
+    names = []
     for stock in tickers.tickers:
         info = tickers.tickers[stock].info
         stock = parse_stock(info)
@@ -29,7 +30,8 @@ def get_prices(stocks):
         pevals.append(stock["pe"])
         betas.append(stock["beta"])
         div_fives.append(stock["div_five_year"])
-    return prices, epsvals, pevals, betas, div_fives
+        names.append(stock["name"])
+    return prices, epsvals, pevals, betas, div_fives, names
 
 
 def get_stats(stocks):
@@ -49,13 +51,13 @@ def get_stats(stocks):
         annual_return = get_return(prices[0], prices[-1])
         n = len(price_changes)
         total = sum(price_changes)
-        mu = round(round(total/n, 4) * 100, 2)
-        sigma = round(round(statistics.stdev(price_changes), 4) * 100, 2)
+        mu = round(round(total/n, 4) * 100, 2) if n > 0 else 0
+        sigma = round(round(statistics.stdev(price_changes), 4) * 100, 2) if n > 0 else 0
         mus.append(mu)
         sigmas.append(sigma)
         annual_returns.append(annual_return)
-    prices, eps, pes, betas, div_fives = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives))
+    prices, eps, pes, betas, div_fives, names = get_prices(stocks)
+    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names))
 
 
 def convert_currency(field, currency):
