@@ -2,16 +2,38 @@ import csv
 import yfinance as yf
 import statistics
 import math
+import sqlite3
+from contextlib import closing
 from constants import *
 
 
 def get_stocks(csv_file):
-	stocks = []
-	with open(csv_file, newline='') as csvfile:
-		reader = csv.reader(csvfile, delimiter=',')
-		for stock in reader:
-			stocks.append(stock[0])
-	return stocks
+    stocks = []
+    with open(csv_file, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for stock in reader:
+            stocks.append(stock[0])
+    return stocks
+
+
+def update_db(stock_list):
+    
+    creation_query = """CREATE TABLE if NOT EXISTS stocks
+        (code TEXT, name TEXT, pe REAL, pb REAL, eps REAL, price REAL,
+        beta REAL, debt_to_equity REAL, market_cap REAL,
+        cash_per_share REAL, profit_margin REAL, earnings_growth REAL,
+        revenue_growth REAL, div REAL, div_five_year REAL, mu REAL, sigma REAL, cagr REAL, sharpe REAL)"""
+    
+    with closing(sqlite3.connect("stocks.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            cursor.execute(creation_query)
+            for stock in stock_list:
+                 insertion_query = """INSERT INTO stocks (code, price, mu, sigma, eps, pe, beta, cagr,
+                 div_five_year, name, sharpe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+                 cursor.execute(insertion_query, stock)
+            rows = cursor.execute("SELECT * FROM stocks").fetchall()
+            print(rows)
+    return
 
 
 def get_prices(stocks):
@@ -57,7 +79,16 @@ def get_stats(stocks):
         sigmas.append(sigma)
         annual_returns.append(annual_return)
     prices, eps, pes, betas, div_fives, names = get_prices(stocks)
-    return list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names))
+    stock_list_initial = list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names))
+    sharpes = []
+    for stock in stock_list_initial:
+         sharpes.append((stock[7] + stock[8])/stock[3])
+    stock_list_final = []
+    length = range(len(sharpes))
+    for i in length:
+        tup = (sharpes[i],)
+        stock_list_final.append(stock_list_initial[i] + tup)
+    return stock_list_final
 
 
 def convert_currency(field, currency):
