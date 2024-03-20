@@ -31,6 +31,15 @@ def update_db(stock_list):
                  insertion_query = """INSERT INTO stocks (code, price, mu, sigma, eps, pe, beta, cagr,
                  div_five_year, name, sharpe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
                  cursor.execute(insertion_query, stock)
+            # rows = cursor.execute("SELECT * FROM stocks").fetchall()
+            # print(rows)
+    return
+
+
+def filter_db(param):
+    print(param)
+    with closing(sqlite3.connect("stocks.db")) as connection:
+        with closing(connection.cursor()) as cursor:
             rows = cursor.execute("SELECT * FROM stocks").fetchall()
             print(rows)
     return
@@ -82,7 +91,8 @@ def get_stats(stocks):
     stock_list_initial = list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names))
     sharpes = []
     for stock in stock_list_initial:
-         sharpes.append((stock[7] + stock[8])/stock[3])
+         sharpe = round((stock[7] + stock[8])/stock[3], 2) if stock[3] > 0 else 0
+         sharpes.append(sharpe)
     stock_list_final = []
     length = range(len(sharpes))
     for i in length:
