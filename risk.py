@@ -1,5 +1,6 @@
 import sys
 from utils import *
+from constants import MARKET_VOL
 
 
 def main(args):
@@ -7,8 +8,8 @@ def main(args):
     stocks.pop(0)
     if len(args) == 0:
         print("running in filter mode")
-        stocks = get_stocks("nikkei.csv")
-        # stocks.extend(get_stocks("asx.csv"))
+        stocks = get_stocks("asx.csv")
+        # stocks.extend(get_stocks("nikkei.csv"))
         # stocks.extend(get_stocks("sp500.csv"))
     stock_list = get_stats(stocks)
     # update_db(stock_list)
@@ -44,16 +45,17 @@ def main(args):
     total = sum(means)
     mu = round(total / n, 2)
     beta = round(sum(betas) / n, 2)
-    sigma = round(sum(sigmas) / n, 2)
+    sigma_squared = ((MARKET_VOL * MARKET_VOL) / (n * (n - 1))) * ((sum(betas) * sum(betas)) - sum([x**2 for x in betas]))
+    sigma = round(math.sqrt(sigma_squared) * 100, 2)
     average_return = round(sum(annual_returns) / n, 2)
     pe = round(sum(pes) / n, 2)
-    sharpe = round(sum(sharpes) / n, 2)
+    sharpe = round((mu / sigma), 2)
     print()
     print(f"mu:\t{mu}")
     print(f"sigma:\t{sigma}")
+    print(f"sharpe:\t{sharpe}")
     print(f"beta:\t{beta}")
     print(f"return:\t{average_return}")
-    print(f"sharpe:\t{sharpe}")
     print(f"pe:\t{pe}")
 
 
