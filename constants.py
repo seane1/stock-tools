@@ -3,7 +3,7 @@ JPY = 0.01
 GBP = 1.92
 EUR = 1.64
 
-MARKET_VOL = 0.18
+MARKET_VOL = 0.20
 
 # change both
 DATA_PERIOD = "5y"
