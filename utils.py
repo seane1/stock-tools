@@ -2,8 +2,6 @@ import csv
 import yfinance as yf
 import statistics
 import math
-import sqlite3
-from contextlib import closing
 from constants import *
 
 
@@ -14,35 +12,6 @@ def get_stocks(csv_file):
         for stock in reader:
             stocks.append(stock[0])
     return stocks
-
-
-def update_db(stock_list):
-    
-    creation_query = """CREATE TABLE if NOT EXISTS stocks
-        (code TEXT, name TEXT, pe REAL, pb REAL, eps REAL, price REAL,
-        beta REAL, debt_to_equity REAL, market_cap REAL,
-        cash_per_share REAL, profit_margin REAL, earnings_growth REAL,
-        revenue_growth REAL, div REAL, div_five_year REAL, mu REAL, sigma REAL, cagr REAL, sharpe REAL)"""
-    
-    with closing(sqlite3.connect("stocks.db")) as connection:
-        with closing(connection.cursor()) as cursor:
-            cursor.execute(creation_query)
-            for stock in stock_list:
-                 insertion_query = """INSERT INTO stocks (code, price, mu, sigma, eps, pe, beta, cagr,
-                 div_five_year, name, sharpe) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
-                 cursor.execute(insertion_query, stock)
-            # rows = cursor.execute("SELECT * FROM stocks").fetchall()
-            # print(rows)
-    return
-
-
-def filter_db(param):
-    print(param)
-    with closing(sqlite3.connect("stocks.db")) as connection:
-        with closing(connection.cursor()) as cursor:
-            rows = cursor.execute("SELECT * FROM stocks").fetchall()
-            print(rows)
-    return
 
 
 def get_prices(stocks):
@@ -63,7 +32,6 @@ def get_prices(stocks):
         div_fives.append(stock["div_five_year"])
         names.append(stock["name"])
     return prices, epsvals, pevals, betas, div_fives, names
-
 
 def get_stats(stocks):
     data = yf.download(stocks, period=DATA_PERIOD, interval=DATA_INTERVAL)

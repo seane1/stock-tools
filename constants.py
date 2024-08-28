@@ -4,6 +4,8 @@ GBP = 1.92
 EUR = 1.64
 
 MARKET_VOL = 0.20
+MARKET_MEAN = 0.08
+MARGIN_COST = 8.99
 
 # change both
 DATA_PERIOD = "5y"
