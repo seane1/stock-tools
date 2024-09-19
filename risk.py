@@ -12,8 +12,8 @@ def main(args):
     stocks.pop(0)
     if len(args) == 0:
         print("running in filter mode")
-        stocks = get_stocks("nikkei.csv")
-        # stocks.extend(get_stocks("asx.csv"))
+        stocks = get_stocks("asx.csv")
+        # stocks.extend(get_stocks("nikkei.csv"))
         # stocks.extend(get_stocks("sp500.csv"))
     stock_list = get_stats(stocks)
     # update_db(stock_list)
@@ -24,7 +24,8 @@ def main(args):
     annual_returns = []
     pes = []
     sharpes = []
-    print(f"\tmu\tdiv5\tsigma\tsharpe\tbeta\tpe\tratio\tname")
+    div_fives = []
+    print(f"\tmu\tdiv5\tsigma\tsharpe\tbeta\tpe\tmc\tbuy\tname")
     for stock in stock_list:
         code = stock[0]
         price = stock[1]
@@ -36,7 +37,10 @@ def main(args):
         div_five = stock[8]
         name = stock[9]
         # sharpe = stock[10]
-        combined_return = annual_return + div_five
+        market_cap = stock[10]
+        # temp change to get sharpe of price only
+        # combined_return = annual_return + div_five
+        combined_return = annual_return
         sharpe = round(combined_return / sigma_individual, 2) if sigma_individual != 0 else 0
         sharpes.append(sharpe)
         means.append(mean)
@@ -44,18 +48,20 @@ def main(args):
         sigmas.append(sigma_individual)
         annual_returns.append(combined_return)
         pes.append(pe)
+        div_fives.append(div_five)
         ratio = round((combined_return / 100) / beta_individual, 2) if beta_individual != 0 and sigma_individual != 0 else 0
         if len(args) == 0:
-            # if ratio > 0.6:
-            print(f"{code}\t{'%.2f' % combined_return}\t{div_five}\t{sigma_individual}\t{sharpe}\t{beta_individual}\t{pe}\t{ratio}\t{name}")
+            if div_five > 3 and market_cap > 10:
+                print(f"{code}\t{'%.2f' % combined_return}\t{div_five}\t{sigma_individual}\t{sharpe}\t{beta_individual}\t{pe}\t{market_cap}\t{int(price * 100)}\t{name}")
         else:
-            print(f"{code}\t{'%.2f' % combined_return}\t{div_five}\t{sigma_individual}\t{sharpe}\t{beta_individual}\t{pe}\t{ratio}\t{name}")
+            print(f"{code}\t{'%.2f' % combined_return}\t{div_five}\t{sigma_individual}\t{sharpe}\t{beta_individual}\t{pe}\t{market_cap}\t{name}")
     n = len(means)
     total = sum(means)
     mu = round(total / n, 2)
     beta = round(sum(betas) / n, 2)
     sigma = round(beta * MARKET_VOL * 100, 2)
     average_return = round(sum(annual_returns) / n, 2)
+    div = round(sum(div_fives) / n, 2)
     pe = round(sum(pes) / n, 2)
     # sharpe = round((mu / sigma), 2)
     sharpe = round((average_return / sigma), 2)
@@ -67,6 +73,7 @@ def main(args):
     leveraged_return1 = round((average_return) + (gearing1 * (average_return - MARGIN_COST)), 2)
     leveraged_return2 = round((average_return) + (gearing2 * (average_return - MARGIN_COST)), 2)
     loan = 20000
+    leveraged_div_five = round(leverage1 * div, 2)
     # equity = int(loan / gearing2)
     # ratio = (loan / 0.75) / equity
     # margin_call = round(1 - ratio, 2)
@@ -76,7 +83,8 @@ def main(args):
     print(f"sharpe:\t{sharpe}")
     print(f"beta:\t{beta}")
     print(f"L:\t{leverage1}")
-    print(f"L*Rp:\t{leveraged_return1}")
+    print(f"RL:\t{leveraged_return1}")
+    print(f"Div5L:\t{leveraged_div_five}")
     # print(f"kelly:\t{kelly}")
     print(f"gear:\t{gearing1}")
     # print(f"call:\t{margin_call}")
@@ -85,8 +93,8 @@ def main(args):
     # print(f"mean:\t{mu}")
     # print(f"pe:\t{pe}")
 
-    if len(args) != 0:
-        plot(leveraged_return1, leverage1, sigma)
+    # if len(args) != 0:
+    #     plot(leveraged_return1, leverage1, sigma)
 
 def plot(leveraged_return, leverage, sigma):
     # Define the parameters for the bell curves

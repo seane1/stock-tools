@@ -22,6 +22,7 @@ def get_prices(stocks):
     betas = []
     div_fives = []
     names = []
+    market_caps = []
     for stock in tickers.tickers:
         info = tickers.tickers[stock].info
         stock = parse_stock(info)
@@ -31,7 +32,8 @@ def get_prices(stocks):
         betas.append(stock["beta"])
         div_fives.append(stock["div_five_year"])
         names.append(stock["name"])
-    return prices, epsvals, pevals, betas, div_fives, names
+        market_caps.append(stock["market_cap"])
+    return prices, epsvals, pevals, betas, div_fives, names, market_caps
 
 def get_stats(stocks):
     data = yf.download(stocks, period=DATA_PERIOD, interval=DATA_INTERVAL)
@@ -55,8 +57,8 @@ def get_stats(stocks):
         mus.append(mu)
         sigmas.append(sigma)
         annual_returns.append(annual_return)
-    prices, eps, pes, betas, div_fives, names = get_prices(stocks)
-    stock_list_initial = list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names))
+    prices, eps, pes, betas, div_fives, names, market_caps = get_prices(stocks)
+    stock_list_initial = list(zip(stocks, prices, mus, sigmas, eps, pes, betas, annual_returns, div_fives, names, market_caps))
     sharpes = []
     for stock in stock_list_initial:
          sharpe = round((stock[7] + stock[8])/stock[3], 2) if stock[3] > 0 else 0
@@ -101,7 +103,6 @@ def parse_stock(info):
         "pe" : round(info["trailingPE"], 2) if "trailingPE" in keys and type(info["trailingPE"]) is not str  else 0,
         "beta" : info["beta"] if "beta" in keys else 0,
         "debt_to_equity" : round(info["debtToEquity"]/100, 2) if "debtToEquity" in keys else 0,
-        "market_cap" : market_cap,
         "cash_per_share" : cash_per_share,
         "market_cap" : int(convert_currency(market_cap, currency)) if currency != 0 else 0,
         "cash_per_share" : round(convert_currency(cash_per_share, currency), 2) if currency != 0 else 0,
